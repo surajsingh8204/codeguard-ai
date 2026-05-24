@@ -115,30 +115,113 @@ class GitHubWebhookService:
 
             for review in reviews:
 
-                findings = review[
-                    "security_review"
-                ].get("findings", [])
-
                 formatted_review += f"""
-# 🔐 Security Review for `{review['file']}`
+# 🤖 AI Engineering Review for `{review['file']}`
 
 """
 
-                for finding in findings:
+                # =========================
+                # SECURITY FINDINGS
+                # =========================
 
-                    formatted_review += f"""
+                security_findings = review[
+                    "security_review"
+                ].get("findings", [])
+
+                if security_findings:
+
+                    formatted_review += """
+# 🔐 Security Findings
+
+"""
+
+                    for finding in security_findings:
+
+                        formatted_review += f"""
 ## 🚨 {finding.get('severity', 'UNKNOWN')} Severity
 
 - Category: {finding.get('category', 'Security')}
 
 ### Issue
-{finding.get('issue', 'No issue detected')}
+{finding.get('issue', '')}
 
 ### Impact
-{finding.get('impact', 'No impact provided')}
+{finding.get('impact', '')}
 
 ### Recommended Fix
-{finding.get('fix', 'No fix suggested')}
+{finding.get('fix', '')}
+
+---
+"""
+
+                # =========================
+                # PERFORMANCE FINDINGS
+                # =========================
+
+                performance_findings = review[
+                    "performance_review"
+                ].get("findings", [])
+
+                if performance_findings:
+
+                    formatted_review += """
+# ⚡ Performance Findings
+
+"""
+
+                    for finding in performance_findings:
+
+                        formatted_review += f"""
+## ⚠️ {finding.get('severity', 'UNKNOWN')} Severity
+
+- Category: {finding.get('category', 'Performance')}
+
+### Issue
+{finding.get('issue', '')}
+
+### Impact
+{finding.get('impact', '')}
+
+### Recommended Fix
+{finding.get('fix', '')}
+
+---
+"""
+
+                # =========================
+                # RISK ANALYSIS
+                # =========================
+
+                risk_review = review.get(
+                    "risk_review",
+                    {}
+                )
+
+                if risk_review:
+
+                    affected_systems = "\n".join([
+                        f"- {system}"
+                        for system in risk_review.get(
+                            "affected_systems",
+                            []
+                        )
+                    ])
+
+                    formatted_review += f"""
+# 📊 Risk Analysis
+
+- Risk Score: {risk_review.get('risk_score', 0)}/10
+
+- Deployment Risk: {risk_review.get('deployment_risk', 'UNKNOWN')}
+
+### Affected Systems
+{affected_systems}
+
+### Summary
+{risk_review.get('summary', '')}
+
+### Recommendation
+{risk_review.get('recommendation', '')}
 
 ---
 """

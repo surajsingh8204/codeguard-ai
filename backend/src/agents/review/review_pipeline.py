@@ -1,5 +1,5 @@
-from src.agents.security.security_agent import (
-    SecurityAgent
+from src.agents.review.langgraph_workflow import (
+    app
 )
 
 
@@ -7,7 +7,7 @@ class ReviewPipeline:
 
     def __init__(self):
 
-        self.security_agent = SecurityAgent()
+        self.workflow = app
 
     def run(self, changed_files):
 
@@ -20,14 +20,33 @@ class ReviewPipeline:
             if not patch:
                 continue
 
-            security_review = self.security_agent.run(
-                file["filename"],
-                patch
+            initial_state = {
+                "file_name": file["filename"],
+                "patch": patch,
+                "risk_review": {},
+                "security_review": {},
+                "performance_review": {}
+            }
+
+            result = self.workflow.invoke(
+                initial_state
             )
 
             reviews.append({
                 "file": file["filename"],
-                "security_review": security_review
+
+                "security_review": result.get(
+                    "security_review",
+                    {}
+                ),
+                "performance_review": result.get(
+                    "performance_review",
+                    {}
+                ),
+                "risk_review": result.get(
+                    "risk_review",
+                    {}
+                )
             })
 
         return reviews
