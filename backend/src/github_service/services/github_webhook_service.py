@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from src.core.logger.logger import AppLogger
 
 from src.github_service.services.pr_service import (
@@ -12,6 +14,10 @@ from src.agents.review.review_pipeline import (
     ReviewPipeline
 )
 
+from src.store.review_store import (
+    ReviewStore
+)
+
 
 class GitHubWebhookService:
 
@@ -24,6 +30,10 @@ class GitHubWebhookService:
         self.review_pipeline = ReviewPipeline()
 
         self.comment_service = CommentService()
+
+        self.latest_review = None
+
+        self.reviews_by_key = {}
 
     async def handle_webhook(self, payload, headers):
 
@@ -74,6 +84,8 @@ class GitHubWebhookService:
                 changed_files
             )
 
+            ReviewStore.save_review(reviews)
+
             self.logger.info(
                 "AI review pipeline completed"
             )
@@ -81,6 +93,17 @@ class GitHubWebhookService:
             formatted_review = self._format_reviews(
                 reviews
             )
+
+            review_payload = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "pr": pr_data,
+                "reviews": reviews
+            }
+
+            key = f"{pr_data['repo']}#{pr_data['number']}"
+
+            self.latest_review = review_payload
+            self.reviews_by_key[key] = review_payload
 
             self.comment_service.post_pr_comment(
                 repo_name=pr_data["repo"],
@@ -299,3 +322,13 @@ class GitHubWebhookService:
             )
 
             return "Failed to format AI review."
+
+    def get_latest_review(self):
+
+        return self.latest_review
+
+    def get_review(self, repo, pr_number):
+
+        key = f"{repo}#{pr_number}"
+
+        return self.reviews_by_key.get(key)

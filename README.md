@@ -33,6 +33,21 @@ The platform acts as an autonomous AI engineering reviewer capable of supporting
 
 ---
 
+# Frontend Demo (Vite)
+
+The demo UI lives in frontend-vite and focuses on a single cinematic dashboard page for rapid judging.
+
+Highlights:
+
+- Risk status hero and live system indicators
+- Multi-agent pipeline visualization
+- Security findings and impact summary
+- AI patch preview
+
+Note: the dashboard currently uses mocked data until backend integration is completed.
+
+---
+
 # Core Vision
 
 Traditional AI code reviewers:
@@ -480,30 +495,37 @@ This significantly improves:
 # Repository Structure
 
 ```text
-src/
-├── agents/
-│   ├── base/
-│   ├── security/
-│   ├── performance/
-│   ├── risk/
-│   ├── impact/
-│   ├── fix/
-│   └── review/
-│
-├── analyzers/
-│   └── static/
-│       └── semgrep_analyzer.py
-│
-├── github_service/
-│   ├── clients/
-│   ├── services/
-│   └── webhook/
-│
-├── core/
-│   ├── config/
-│   └── logger/
-│
-└── main.py
+backend/
+└── src/
+      ├── agents/
+      │   ├── base/
+      │   ├── security/
+      │   ├── performance/
+      │   ├── risk/
+      │   ├── impact/
+      │   ├── fix/
+      │   └── review/
+      │
+      ├── analyzers/
+      │   └── static/
+      │       └── semgrep_analyzer.py
+      │
+      ├── github_service/
+      │   ├── clients/
+      │   ├── services/
+      │   └── webhook/
+      │
+      ├── core/
+      │   ├── config/
+      │   └── logger/
+      │
+      └── main.py
+
+frontend-vite/
+└── src/
+      ├── App.jsx
+      └── pages/
+            └── Dashboard.jsx
 ```
 
 ---
@@ -515,6 +537,13 @@ src/
 - FastAPI
 - Python
 - Uvicorn
+
+## Frontend
+
+- Vite
+- React
+- Tailwind CSS
+- Lucide React
 
 ## AI Infrastructure
 
