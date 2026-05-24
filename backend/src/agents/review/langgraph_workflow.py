@@ -18,6 +18,10 @@ from src.agents.impact.impact_agent import (
     ImpactAgent
 )
 
+from src.agents.fix.fix_agent import (
+    FixAgent
+)
+
 
 class ReviewState(TypedDict):
 
@@ -33,6 +37,8 @@ class ReviewState(TypedDict):
 
     impact_review: dict
 
+    fix_review: dict
+
 
 security_agent = SecurityAgent()
 
@@ -41,6 +47,8 @@ performance_agent = PerformanceAgent()
 risk_agent = RiskAgent()
 
 impact_agent = ImpactAgent()
+
+fix_agent = FixAgent()
 
 def risk_node(state: ReviewState):
 
@@ -97,6 +105,36 @@ def impact_node(state: ReviewState):
 
     return state
 
+def fix_node(state: ReviewState):
+
+    findings = {
+        "security_review": state.get(
+            "security_review",
+            {}
+        ),
+        "performance_review": state.get(
+            "performance_review",
+            {}
+        ),
+        "risk_review": state.get(
+            "risk_review",
+            {}
+        ),
+        "impact_review": state.get(
+            "impact_review",
+            {}
+        )
+    }
+
+    result = fix_agent.run(
+        state["patch"],
+        findings
+    )
+
+    state["fix_review"] = result
+
+    return state
+
 
 workflow = StateGraph(ReviewState)
 
@@ -120,6 +158,11 @@ workflow.add_node(
     impact_node
 )
 
+workflow.add_node(
+    "fix_agent",
+    fix_node
+)
+
 workflow.set_entry_point(
     "security_agent"
 )
@@ -141,6 +184,11 @@ workflow.add_edge(
 
 workflow.add_edge(
     "impact_agent",
+    "fix_agent"
+)
+
+workflow.add_edge(
+    "fix_agent",
     END
 )
 

@@ -229,7 +229,7 @@ class GitHubWebhookService:
                 # =========================
                 # IMPACT ANALYSIS
                 # =========================
-                
+
                 impact_review = review.get(
                     "impact_review",
                     {}
@@ -261,6 +261,31 @@ class GitHubWebhookService:
 
 ### Recommendation
 {impact_review.get('recommendation', '')}
+
+---
+"""
+
+                # =========================
+                # FIX SUGGESTION
+                # =========================
+
+                fix_review = review.get(
+                    "fix_review",
+                    {}
+                )
+
+                if fix_review:
+
+                    formatted_review += f"""
+# 🛠️ Suggested AI Patch
+
+### Patch Summary
+{fix_review.get('patch_summary', '')}
+
+### Improved Code
+```python
+{fix_review.get('fixed_code', '')}
+```
 
 ---
 """
