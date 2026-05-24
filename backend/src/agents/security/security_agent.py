@@ -15,6 +15,10 @@ from src.core.logger.logger import (
     AppLogger
 )
 
+from src.analyzers.static.semgrep_analyzer import (
+    SemgrepAnalyzer
+)
+
 
 class SecurityAgent(BaseAgent):
 
@@ -25,6 +29,9 @@ class SecurityAgent(BaseAgent):
         self.client = Groq(
             api_key=settings.GROQ_API_KEY
         )
+
+        # Initialize Semgrep Analyzer
+        self.semgrep = SemgrepAnalyzer()
 
         self.system_prompt = """
         You are a senior application security engineer.
@@ -40,9 +47,11 @@ class SecurityAgent(BaseAgent):
         - command injection
         - dangerous patterns
 
-        RETURN STRICT JSON ONLY.
+        Use BOTH:
+        - code diff
+        - semgrep findings
 
-        DO NOT use markdown.
+        RETURN STRICT JSON ONLY.
 
         RESPONSE FORMAT:
 
@@ -63,12 +72,42 @@ class SecurityAgent(BaseAgent):
 
         try:
 
+            # =========================
+            # RUN SEMGREP ANALYSIS
+            # =========================
+
+            semgrep_findings = self.semgrep.analyze(
+                file_name,
+                patch
+            )
+
+            self.logger.info(
+                f"Semgrep findings: {semgrep_findings}"
+            )
+
+            # =========================
+            # BUILD AI PROMPT
+            # =========================
+
             prompt = f"""
             File: {file_name}
 
             Diff:
             {patch}
+
+            Semgrep Findings:
+            {json.dumps(semgrep_findings, indent=2)}
+
+            Use BOTH:
+            - code diff
+            - semgrep findings
+
+            to generate the final security review.
             """
+
+            # =========================
+            # GROQ AI ANALYSIS
+            # =========================
 
             response = self.client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
@@ -90,6 +129,10 @@ class SecurityAgent(BaseAgent):
             self.logger.info(
                 f"Raw security response: {raw_result}"
             )
+
+            # =========================
+            # PARSE JSON RESPONSE
+            # =========================
 
             parsed_result = self._extract_json(
                 raw_result
