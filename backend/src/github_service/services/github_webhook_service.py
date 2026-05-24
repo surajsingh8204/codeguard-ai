@@ -226,6 +226,45 @@ class GitHubWebhookService:
 ---
 """
 
+                # =========================
+                # IMPACT ANALYSIS
+                # =========================
+                
+                impact_review = review.get(
+                    "impact_review",
+                    {}
+                )
+
+                if impact_review:
+
+                    affected_systems = "\n".join([
+                        f"- {system}"
+                        for system in impact_review.get(
+                            "affected_systems",
+                                []
+                        )
+                    ])
+
+                    formatted_review += f"""
+# 🏗️ Architectural Impact Analysis
+
+- Criticality: {impact_review.get('criticality', 'UNKNOWN')}
+
+### Affected Systems
+{affected_systems}
+
+### Architectural Impact
+{impact_review.get('architectural_impact', '')}
+
+### Production Risk
+{impact_review.get('production_risk', '')}
+
+### Recommendation
+{impact_review.get('recommendation', '')}
+
+---
+"""
+
             return formatted_review
 
         except Exception as e:

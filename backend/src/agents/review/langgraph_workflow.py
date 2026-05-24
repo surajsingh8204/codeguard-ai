@@ -14,6 +14,10 @@ from src.agents.risk.risk_agent import (
     RiskAgent
 )
 
+from src.agents.impact.impact_agent import (
+    ImpactAgent
+)
+
 
 class ReviewState(TypedDict):
 
@@ -27,12 +31,16 @@ class ReviewState(TypedDict):
 
     risk_review: dict
 
+    impact_review: dict
+
 
 security_agent = SecurityAgent()
 
 performance_agent = PerformanceAgent()
 
 risk_agent = RiskAgent()
+
+impact_agent = ImpactAgent()
 
 def risk_node(state: ReviewState):
 
@@ -78,6 +86,17 @@ def performance_node(state: ReviewState):
 
     return state
 
+def impact_node(state: ReviewState):
+
+    result = impact_agent.run(
+        state["file_name"],
+        state["patch"]
+    )
+
+    state["impact_review"] = result
+
+    return state
+
 
 workflow = StateGraph(ReviewState)
 
@@ -96,6 +115,11 @@ workflow.add_node(
     risk_node
 )
 
+workflow.add_node(
+    "impact_agent",
+    impact_node
+)
+
 workflow.set_entry_point(
     "security_agent"
 )
@@ -112,6 +136,11 @@ workflow.add_edge(
 
 workflow.add_edge(
     "risk_agent",
+    "impact_agent"
+)
+
+workflow.add_edge(
+    "impact_agent",
     END
 )
 

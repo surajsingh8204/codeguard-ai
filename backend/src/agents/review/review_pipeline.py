@@ -25,7 +25,8 @@ class ReviewPipeline:
                 "patch": patch,
                 "risk_review": {},
                 "security_review": {},
-                "performance_review": {}
+                "performance_review": {},
+                "impact_review": {}
             }
 
             result = self.workflow.invoke(
@@ -45,6 +46,10 @@ class ReviewPipeline:
                 ),
                 "risk_review": result.get(
                     "risk_review",
+                    {}
+                ),
+                "impact_review": result.get(
+                    "impact_review",
                     {}
                 )
             })
