@@ -8,3 +8,5 @@ pydantic-settings
 langgraph
 langchain-core
 requests
+GitPython
+semgrep

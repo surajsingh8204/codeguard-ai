@@ -11,6 +11,8 @@ env/
 
 # Environment Variables
 .env
+.env.*
+!.env.example
 
 # Logs
 logs/
@@ -26,6 +28,14 @@ Thumbs.db
 
 # Testing
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.cache/
+
+# Python version files
+.python-version
 
 # LangChain / Chroma
 chroma_db/

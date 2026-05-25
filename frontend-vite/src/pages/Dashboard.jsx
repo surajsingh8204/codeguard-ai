@@ -8,7 +8,7 @@ import {
   Terminal,
 } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1";
 
 const fallbackSecurityFindings = [
   {
@@ -131,8 +131,17 @@ export default function Dashboard() {
   const [reviewData, setReviewData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [repoUrl, setRepoUrl] = useState("");
+  const [repoLoading, setRepoLoading] = useState(false);
+  const [repoError, setRepoError] = useState("");
+  const [manualMode, setManualMode] = useState(false);
 
   useEffect(() => {
+    if (manualMode) {
+      setLoading(false);
+      return undefined;
+    }
+
     let active = true;
 
     const loadLatest = async () => {
@@ -178,7 +187,58 @@ export default function Dashboard() {
       active = false;
       clearInterval(timer);
     };
-  }, []);
+  }, [manualMode]);
+
+  const analyzeRepo = async () => {
+    const trimmedUrl = repoUrl.trim();
+
+    if (!trimmedUrl) {
+      setRepoError("Enter a GitHub repository URL to analyze.");
+      return;
+    }
+
+    try {
+      setRepoError("");
+      setRepoLoading(true);
+      setManualMode(true);
+
+      const response = await fetch(`${API_BASE}/api/v1/analyze-repo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          repo_url: trimmedUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const reviews = Array.isArray(data?.reviews) ? data.reviews : [];
+
+      if (reviews.length > 0) {
+        setReviewData({
+          reviews,
+          pr: {
+            repo: trimmedUrl,
+            number: "Repo Scan",
+            title: "Repository analysis",
+          },
+        });
+        setError("");
+      } else {
+        setReviewData(null);
+        setRepoError("No reviewable files found in this repository.");
+      }
+    } catch (err) {
+      setRepoError(err.message || "Repository analysis failed.");
+    } finally {
+      setRepoLoading(false);
+    }
+  };
 
   const reviews = reviewData?.reviews || [];
   const primaryReview = reviews[0] || {};
@@ -359,6 +419,37 @@ export default function Dashboard() {
             </div>
           </div>
         </header>
+
+        <section className="mt-8 rounded-3xl border border-cyan-400/20 bg-slate-950/60 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.45)]">
+          <div className="text-xs uppercase tracking-[0.35em] text-cyan-200/80">
+            lightweight repository analysis
+          </div>
+          <p className="mt-2 text-sm text-slate-400">
+            Paste a public GitHub URL to run a quick multi-agent scan.
+          </p>
+          <div className="mt-5 flex flex-col gap-3 md:flex-row">
+            <input
+              type="text"
+              placeholder="Paste GitHub Repository URL"
+              value={repoUrl}
+              onChange={(event) => setRepoUrl(event.target.value)}
+              className="flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300/60 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={analyzeRepo}
+              disabled={repoLoading}
+              className="rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-500/50"
+            >
+              {repoLoading ? "Analyzing..." : "Analyze Repository"}
+            </button>
+          </div>
+          {repoError && (
+            <div className="mt-3 text-xs text-rose-200">
+              {repoError}
+            </div>
+          )}
+        </section>
 
         {error && (
           <div className="mt-8 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-200">
