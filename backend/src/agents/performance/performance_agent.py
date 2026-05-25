@@ -1,14 +1,11 @@
 import json
 import re
 
-from groq import Groq
-
 from src.agents.base.base_agent import (
     BaseAgent
 )
-
-from src.core.config.settings import (
-    settings
+from src.agents.base.llm_client import (
+    LLMClient
 )
 
 from src.core.logger.logger import (
@@ -22,9 +19,7 @@ class PerformanceAgent(BaseAgent):
 
         self.logger = AppLogger.get_logger(__name__)
 
-        self.client = Groq(
-            api_key=settings.GROQ_API_KEY
-        )
+        self.llm = LLMClient()
 
         self.system_prompt = """
         You are a senior performance optimization engineer.
@@ -67,22 +62,11 @@ class PerformanceAgent(BaseAgent):
             {patch}
             """
 
-            response = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
+            raw_result = self.llm.generate(
+                system_prompt=self.system_prompt,
+                user_prompt=prompt,
                 temperature=0.1
             )
-
-            raw_result = response.choices[0].message.content
 
             self.logger.info(
                 f"Raw performance response: {raw_result}"
