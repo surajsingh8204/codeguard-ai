@@ -26,28 +26,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-def _build_cors_origins():
-
-    origins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174"
-    ]
-
-    extra = [
-        origin.strip()
-        for origin in (settings.CORS_ORIGINS or "").split(",")
-        if origin.strip()
-    ]
-
-    for origin in extra:
-        if origin not in origins:
-            origins.append(origin)
-
-    return origins
-
-
 def _verify_github_signature(raw_body, headers):
 
     secret = settings.GITHUB_WEBHOOK_SECRET
@@ -73,7 +51,7 @@ def _verify_github_signature(raw_body, headers):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_build_cors_origins(),
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
