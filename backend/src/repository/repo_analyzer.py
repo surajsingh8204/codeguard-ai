@@ -1,8 +1,9 @@
 import os
 import shutil
 import tempfile
+import zipfile
 
-from git import Repo
+import requests
 
 from src.core.logger.logger import (
     AppLogger
@@ -24,23 +25,61 @@ class RepoAnalyzer:
     def analyze_repository(self, repo_url):
 
         temp_dir = None
-        repo = None
 
         try:
 
-            if not repo_url:
-                return []
-
             self.logger.info(
-                f"Cloning repository: {repo_url}"
+                f"Downloading repository: {repo_url}"
             )
 
             temp_dir = tempfile.mkdtemp()
 
-            repo = Repo.clone_from(
-                repo_url,
+            repo_name = repo_url.rstrip("/").split("/")[-1]
+
+            zip_url = f"{repo_url}/archive/refs/heads/main.zip"
+
+            zip_path = os.path.join(
                 temp_dir,
-                depth=1
+                "repo.zip"
+            )
+
+            response = requests.get(zip_url)
+
+            if response.status_code != 200:
+
+                zip_url = (
+                    f"{repo_url}/archive/refs/heads/master.zip"
+                )
+
+                response = requests.get(zip_url)
+
+            if response.status_code != 200:
+
+                raise Exception(
+                    "Failed to download repository"
+                )
+
+            with open(zip_path, "wb") as f:
+
+                f.write(response.content)
+
+            with zipfile.ZipFile(
+                zip_path,
+                "r"
+            ) as zip_ref:
+
+                zip_ref.extractall(temp_dir)
+
+            extracted_dirs = [
+                d for d in os.listdir(temp_dir)
+                if os.path.isdir(
+                    os.path.join(temp_dir, d)
+                )
+            ]
+
+            repo_folder = os.path.join(
+                temp_dir,
+                extracted_dirs[0]
             )
 
             files_to_review = []
@@ -50,63 +89,49 @@ class RepoAnalyzer:
                 ".js",
                 ".ts"
             )
-            max_files = 3
 
-            for root, dirs, files in os.walk(temp_dir):
-
-                if ".git" in dirs:
-                    dirs.remove(".git")
+            for root, _, files in os.walk(repo_folder):
 
                 for file in files:
 
-                    if not file.endswith(
+                    if file.endswith(
                         allowed_extensions
                     ):
-                        continue
 
-                    file_path = os.path.join(
-                        root,
-                        file
-                    )
-                    rel_path = os.path.relpath(
-                        file_path,
-                        temp_dir
-                    )
-
-                    try:
-
-                        with open(
-                            file_path,
-                            "r",
-                            encoding="utf-8",
-                            errors="ignore"
-                        ) as f:
-
-                            content = f.read()
-
-                        files_to_review.append({
-                            "filename": rel_path,
-                            "patch": content[:8000]
-                        })
-
-                    except Exception as e:
-
-                        self.logger.error(
-                            str(e)
+                        file_path = os.path.join(
+                            root,
+                            file
                         )
 
-                    if len(files_to_review) >= max_files:
+                        try:
+
+                            with open(
+                                file_path,
+                                "r",
+                                encoding="utf-8",
+                                errors="ignore"
+                            ) as f:
+
+                                content = f.read()
+
+                            files_to_review.append({
+                                "filename": file,
+                                "patch": content[:8000]
+                            })
+
+                        except Exception as e:
+
+                            self.logger.error(str(e))
+
+                    if len(files_to_review) >= 3:
                         break
 
-                if len(files_to_review) >= max_files:
+                if len(files_to_review) >= 3:
                     break
 
             self.logger.info(
                 f"Collected {len(files_to_review)} files"
             )
-
-            if not files_to_review:
-                return []
 
             reviews = self.review_pipeline.run(
                 files_to_review
@@ -122,21 +147,6 @@ class RepoAnalyzer:
 
         finally:
 
-            if repo is not None:
-                try:
-                    repo.close()
-                except Exception:
-                    self.logger.error("Failed to close repo handle")
-
             if temp_dir and os.path.exists(temp_dir):
 
-                def _onerror(func, path, exc_info):
-                    try:
-                        os.chmod(path, 0o700)
-                        func(path)
-                    except Exception:
-                        self.logger.error(
-                            f"Cleanup failed for {path}: {exc_info[1]}"
-                        )
-
-                shutil.rmtree(temp_dir, onerror=_onerror)
+                shutil.rmtree(temp_dir)
