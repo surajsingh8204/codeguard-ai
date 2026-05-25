@@ -85,11 +85,16 @@ class LLMClient:
             user_prompt
         )
 
+        generation_config = {
+            "temperature": temperature,
+            "max_output_tokens": settings.GEMINI_MAX_OUTPUT_TOKENS,
+            "top_p": settings.GEMINI_TOP_P,
+            "top_k": settings.GEMINI_TOP_K
+        }
+
         response = model.generate_content(
             prompt,
-            generation_config={
-                "temperature": temperature
-            }
+            generation_config=generation_config
         )
 
         return response.text or ""

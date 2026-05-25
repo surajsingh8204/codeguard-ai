@@ -53,7 +53,7 @@ class ReviewAgent(BaseAgent):
             result = self.llm.generate(
                 system_prompt=self.system_prompt,
                 user_prompt=prompt,
-                temperature=0.2
+                temperature=0.1
             )
 
             self.logger.info(
