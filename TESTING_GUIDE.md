@@ -2,8 +2,7 @@
 
 ## Demo URLs
 
-- Frontend: <FRONTEND_URL>
-- Backend: <BACKEND_URL>
+- Frontend (hosted app): https://codeguard-ai-rho.vercel.app
 
 ## Option A: GitHub PR Webhook (Recommended)
 
@@ -16,7 +15,7 @@
 ## Option B: Repo URL Analysis (No Webhook)
 
 1. Open the frontend dashboard.
-2. Paste a public GitHub repository URL into the input.
+2. Paste https://github.com/surajsingh8204/ai-review-test into the input.
 3. Click Analyze Repository.
 4. Review the findings in the dashboard.
 

@@ -48,6 +48,44 @@ Note: the dashboard currently uses mocked data until backend integration is comp
 
 ---
 
+# Live App
+
+- https://codeguard-ai-rho.vercel.app
+
+---
+
+# Screenshots
+
+![Dashboard hero](docs/screenshots/dashboard-hero.png)
+![Repository and risk tiles](docs/screenshots/repo-risk-tiles.png)
+![Review pipeline status](docs/screenshots/review-pipeline.png)
+![Security and performance findings](docs/screenshots/security-performance-findings.png)
+![Risk and impact review](docs/screenshots/risk-impact-review.png)
+![Fix review patch preview](docs/screenshots/fix-review.png)
+
+---
+
+# Webhook Demo (Option A: GitHub PR Webhook)
+
+1. Fork the demo repo: https://github.com/surajsingh8204/ai-review-test
+2. Create a new branch and make a small change (for example, add a comment in app.py).
+3. Open a pull request back to the original repo.
+4. Wait for the bot comment to appear on the PR.
+5. Open the frontend dashboard and confirm the latest review appears.
+
+---
+
+# Repo URL Analysis (Option B: No Webhook)
+
+The dashboard can analyze a public repository directly from its URL without GitHub webhooks.
+
+1. Open the frontend dashboard.
+2. Paste https://github.com/surajsingh8204/ai-review-test into the input.
+3. Click Analyze Repository.
+4. Review the findings in the dashboard.
+
+---
+
 # Core Vision
 
 Traditional AI code reviewers:
