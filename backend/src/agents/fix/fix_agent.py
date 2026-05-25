@@ -62,7 +62,7 @@ class FixAgent(BaseAgent):
             raw_result = self.llm.generate(
                 system_prompt=self.system_prompt,
                 user_prompt=prompt,
-                temperature=0.1
+                temperature=0.2
             )
 
             self.logger.info(
