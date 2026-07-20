@@ -1,15 +1,48 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap");
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-surface-950: #070b14;
+  --color-surface-900: #0b1220;
+  --color-surface-800: #111827;
+  --color-surface-700: #1a2332;
+  --color-accent-blue: #3b82f6;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-sky: #38bdf8;
+}
 
 :root {
   color-scheme: dark;
+  --bg-base: #070b14;
+  --bg-elevated: rgba(17, 24, 39, 0.72);
+  --bg-glass: rgba(15, 23, 42, 0.55);
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --border-accent: rgba(56, 189, 248, 0.28);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #22d3ee;
+  --accent-blue: #3b82f6;
+  --shadow-glow: 0 0 40px rgba(34, 211, 238, 0.08);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: #05070f;
-  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -17,6 +50,72 @@ body {
 }
 
 code,
-pre {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.glass-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+}
+
+.glass-card-accent {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-accent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+}
+
+.bg-mesh {
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.14), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(59, 130, 246, 0.1), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 100%, rgba(34, 211, 238, 0.06), transparent);
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.diff-add {
+  color: #6ee7b7;
+}
+
+.diff-del {
+  color: #fda4af;
+}
+
+.diff-ctx {
+  color: #94a3b8;
 }
