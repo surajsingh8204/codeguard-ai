@@ -18,4 +18,12 @@ services:
       - key: GEMINI_API_KEY
         scope: project
       - key: CORS_ORIGINS
-        value: "*"
+        sync: false
+      - key: ALLOW_INSECURE_WEBHOOKS
+        value: "false"
+      - key: RATE_LIMIT_REQUESTS
+        value: "60"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
+      - key: REVIEW_CACHE_TTL_SECONDS
+        value: "300"

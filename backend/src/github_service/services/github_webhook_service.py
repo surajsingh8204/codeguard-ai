@@ -127,7 +127,7 @@ class GitHubWebhookService:
             )
 
             return {
-                "error": str(e)
+                "error": "Webhook processing failed"
             }
 
     def _format_reviews(self, reviews):

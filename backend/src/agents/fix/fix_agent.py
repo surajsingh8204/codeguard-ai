@@ -22,17 +22,21 @@ class FixAgent(BaseAgent):
         self.llm = LLMClient()
 
         self.system_prompt = """
-        You are a senior software engineer.
+        You are a senior software engineer proposing a patch.
 
-        Generate:
-        - secure fixes
-        - optimized code
-        - safer implementations
+        Rules:
+        - Only fix issues present in the provided findings and diff.
+        - PATCH SUMMARY and EXPLANATION must describe ONLY changes
+          that appear in FIXED CODE.
+        - Do not claim CORS, rate limiting, caching, chunking, or
+          other hardening unless FIXED CODE actually implements them.
+        - Treat this as a proposed patch, not as already-applied code.
+        - Prefer the smallest correct change.
 
         RESPONSE FORMAT:
 
         PATCH SUMMARY:
-        ...
+        One or two sentences describing the concrete patch below.
 
         FIXED CODE:
         ```python
@@ -40,7 +44,7 @@ class FixAgent(BaseAgent):
         ```
 
         EXPLANATION:
-        ...
+        Briefly explain how the FIXED CODE addresses the findings.
         """
 
     def run(self, patch, findings):
@@ -54,9 +58,8 @@ class FixAgent(BaseAgent):
             Findings:
             {json.dumps(findings, indent=2)}
 
-            Generate:
-            - improved secure code
-            - optimized implementation
+            Propose a minimal secure fix for these findings only.
+            Keep PATCH SUMMARY and EXPLANATION faithful to FIXED CODE.
             """
 
             raw_result = self.llm.generate(
@@ -86,7 +89,7 @@ class FixAgent(BaseAgent):
             return {
                 "patch_summary": "Patch generation failed",
                 "fixed_code": "",
-                "explanation": str(e)
+                "explanation": "Unable to generate a patch."
             }
 
     def _parse_response(self, text):
@@ -100,7 +103,7 @@ class FixAgent(BaseAgent):
             )
 
             code_match = re.search(
-                r"```python(.*?)```",
+                r"```(?:python)?(.*?)```",
                 text,
                 re.DOTALL
             )
